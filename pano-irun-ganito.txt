@@ -1,0 +1,5 @@
+1. right click niyo yung project tas open niyo integrated terminal
+2. lagay niyo sa integrated terminal (php artisan serve) walang parenthesis
+3. pagtapos non hanapin niyo yung resources/js right click niyo yung js folder 
+tas open niyo integrated terminal lagay niyo to(npm run dev) walang parenthesis wag niyo buksan yung link
+4. refresh niyo yung link na generated ng (php artisan serve)
