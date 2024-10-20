@@ -28,8 +28,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/add-product', function () {
         return Inertia::render('ProductAddItem'); // Page for adding new products
     });
+    Route::get('/edit-product/{id}', function ($id) {
+        // Fetch the product data from the database
+        $product = \App\Models\Product::findOrFail($id);
+        
+        // Render the ProductEditItem page with the product data
+        return Inertia::render('ProductEditItem', ['product' => $product]);
+    });
+    Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
+
+    
 });
 // In routes/api.php
+Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
+
 Route::middleware('auth:sanctum')->get('/products', [ProductController::class, 'index']);
 
 // API routes for product management

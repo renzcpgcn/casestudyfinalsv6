@@ -27,11 +27,13 @@ const ProductEditItem = ({ product }) => {
                 price: product.price || '',
                 available_quantity: product.available_quantity || '',
                 category: product.category || '',
-                image: null, // Set image to null as it's handled by the file input
+                image: null, // Image handled by file input
             });
-            setPreviewImage(product.image_url); // Assuming image_url is passed as part of the product
+            // Adjust this if product.image only contains the filename
+            setPreviewImage(product.image ? `/uploads/${product.image}` : null);
         }
     }, [product]);
+    
 
     // Handle input changes
     const handleInputChange = (e) => {
@@ -47,27 +49,27 @@ const ProductEditItem = ({ product }) => {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const productData = new FormData();
+        const productData = new FormData(); // FormData is required for file uploads
 
-        // Append data for submission
+        // Append the other form data
         productData.append('product_name', formData.product_name);
         productData.append('barcode', formData.barcode);
         productData.append('description', formData.description);
         productData.append('price', formData.price);
         productData.append('available_quantity', formData.available_quantity);
         productData.append('category', formData.category);
-        if (formData.image) productData.append('image', formData.image);
+        productData.append('image', formData.image); // Append the image file
 
         try {
-            // Update the existing product
-            await axios.post(`/products/${product.id}`, productData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
+            await axios.post('/products', productData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
             });
-
-            // Redirect to the dashboard using Inertia
-            Inertia.visit('/dashboard');
+            console.log("Product added successfully");
+            Inertia.visit('/dashboard'); // Use Inertia to navigate to dashboard
         } catch (error) {
-            console.error('Error updating product:', error.response ? error.response.data : error);
+            console.error("Error adding product:", error.response ? error.response.data : error);
         }
     };
 
