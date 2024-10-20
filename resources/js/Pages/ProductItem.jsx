@@ -24,6 +24,7 @@ const ProductItem = ({ product }) => {
     };
 
     return (
+        
         <Card style={{ 
             backgroundColor: '#f8f9fa',  
             width: '250px',             

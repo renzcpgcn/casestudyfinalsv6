@@ -1,47 +1,41 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\ProductController;
-
-
-
+use App\Http\Controllers\ProfileController;
+// Inertia routes
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
     ]);
 });
+Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
 
+// Dashboard route
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Product routes
-    Route::apiResource('products', ProductController::class);
+// Product routes for Inertia
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/products', function () {
+        return Inertia::render('ProductList'); // This is for the Inertia page
+    });
+
+    Route::get('/add-product', function () {
+        return Inertia::render('ProductAddItem'); // Page for adding new products
+    });
 });
+// In routes/api.php
+Route::middleware('auth:sanctum')->get('/products', [ProductController::class, 'index']);
 
-
-// Render ProductList page for product listing
-Route::get('/products', function () {
-    return Inertia::render('ProductList'); // Points to ProductList.jsx
-})->middleware(['auth', 'verified']); // Added middleware for authentication
-
-// Render ProductAddItem page for adding new products
-Route::get('/add-product', function () {
-    return Inertia::render('ProductAddItem');
-})->middleware(['auth', 'verified']);
+// API routes for product management
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('products', ProductController::class);
+    Route::apiResource('/products', ProductController::class); // This will create routes like /api/products
 });
 
+// Authentication routes
 require __DIR__.'/auth.php';

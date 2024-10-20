@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col } from 'react-bootstrap';
-import ProductItem from '@/Components/products/ProductItem';
+import ProductItem from './ProductItem';
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
@@ -23,19 +23,25 @@ const ProductList = () => {
         fetchData();
     }, []);
 
-    return (
-        <Row className="mt-4">
-            {products.length === 0 ? (
-                <p>No products availables.</p>
-            ) : (
-                products.map(product => (
-                    <Col md={4} key={product.id} className="mb-4">
-                        <ProductItem product={product} />
-                    </Col>
-                ))
-            )}
-        </Row>
-    );
-};
+    
+
+    
+        return (
+            <Row className="mt-4">
+                {products.length === 0 ? (
+                    <p>No products available.</p>
+                ) : (
+                    products.map(product => (
+                        <Col md={4} key={product.id} className="mb-4">
+                            <ProductItem product={product} />
+                        </Col>
+                    ))
+                )}
+            </Row>
+        );
+    };
+    
+    
+
 
 export default ProductList;
