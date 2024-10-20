@@ -68,7 +68,6 @@ git pull origin main
 This procedure should help you set up and run your Laravel project on a different computer successfully! If you encounter any issues, feel free to ask for further assistance.
 
 
-
-
+sa pag run naman open mo yung integrated terminal ng project mismo irun mo yung php artisan serve tas open mo yung link, then balik ka sa vs code hanapin mo yung resources folder open mo integrated terminal tas npm run dev wag mo bubuksan yung link na nilabas ng npm run dev(wag mo i stop yung php artisan serve) tas i-refresh mo yung localhost ng laravel
 
 
