@@ -1,16 +1,16 @@
 import React from 'react';
-import { Card, Button } from 'react-bootstrap';
+import { Card } from 'react-bootstrap';
 import { Inertia } from '@inertiajs/inertia'; 
-import axios from 'axios'; // Import axios
+import axiosInstance from '../axiosInstance'; // Adjusted relative path
+import PrimaryButton from '@/Components/PrimaryButton'; // Ensure the correct import path
 
 const ProductItem = ({ product }) => {
+    console.log(product); // Debug to see if product_id exists
+
     const handleDelete = async (productId) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
             try {
-                // Send a DELETE request to the backend
-                await axios.delete(`/products/${productId}`);
-                
-                // Refresh the product list page using Inertia
+                await axiosInstance.delete(`/products/${productId}`);
                 Inertia.visit('/dashboard');  
             } catch (error) {
                 console.error('Error deleting product:', error.response ? error.response.data : error);
@@ -19,21 +19,25 @@ const ProductItem = ({ product }) => {
     };
 
     const handleEdit = () => {
-        // Navigate to the edit route with the product ID
-        Inertia.visit(`/edit-product/${product.id}`); // Make sure this route is defined in web.php
+        // Use product_id to navigate to the edit page
+        const productId = product.product_id; 
+        if (productId) {
+            Inertia.visit(`/edit-product/${productId}`);
+        } else {
+            console.error('Product ID is undefined');
+        }
     };
 
     return (
-        
         <Card style={{ 
             backgroundColor: '#f8f9fa',  
-            width: '250px',             
-            height: '250px',            
-            display: 'flex',            
-            flexDirection: 'column',   
+            width: '350px',              
+            height: '230px',             
+            display: 'flex',             
+            flexDirection: 'column',    
             justifyContent: 'space-between' 
         }}>
-            <Card.Img variant="top" src={product.image || 'placeholder-image-url'} style={{ objectFit: 'cover', height: '60%' }} />
+            <Card.Img variant="top" style={{ objectFit: 'cover', height: '60%' }} />
             <Card.Body style={{ flexGrow: 1 }}>
                 <Card.Title>{product.product_name}</Card.Title>
                 <Card.Text>
@@ -44,8 +48,17 @@ const ProductItem = ({ product }) => {
                     <strong>Category:</strong> {product.category}
                 </Card.Text>
                 <div className="d-flex justify-content-between">
-                    <Button variant="info" onClick={handleEdit}>Edit</Button>
-                    <Button variant="danger" onClick={() => handleDelete(product.id)} className="ml-2">Delete</Button>
+                    {/* Use PrimaryButton for Edit with the same design as Add */}
+                    <PrimaryButton className="me-2" onClick={handleEdit}>
+                        Edit
+                    </PrimaryButton>
+                    {/* Use a styled button for Delete with grey color */}
+                    <PrimaryButton 
+                        className="ml-2" 
+                        style={{ backgroundColor: 'grey', borderColor: 'grey' }} 
+                        onClick={() => handleDelete(product.product_id)}>
+                        Delete
+                    </PrimaryButton>
                 </div>
             </Card.Body>
         </Card>

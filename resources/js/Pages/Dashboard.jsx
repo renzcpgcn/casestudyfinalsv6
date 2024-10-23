@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-import ProductList from '@/Components/products/ProductList';
 import axios from 'axios';
-import { Button } from 'react-bootstrap';
 import { Inertia } from '@inertiajs/inertia'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import ProductList from './ProductList';
+import PrimaryButton from '@/Components/PrimaryButton'; // Import PrimaryButton
 
 export default function Dashboard() {
     const [products, setProducts] = useState([]);
@@ -40,7 +40,10 @@ export default function Dashboard() {
                         Product Dashboard
                     </h2>
                     <div className="ml-auto">
-                        <Button variant="primary" onClick={handleAddProduct}>Add Product</Button>
+                        {/* Use PrimaryButton for the Add Product button */}
+                        <PrimaryButton className="ms-4" onClick={handleAddProduct}>
+                            Add Product
+                        </PrimaryButton>
                     </div>
                 </div>
             }
@@ -53,7 +56,7 @@ export default function Dashboard() {
                     <p>{error}</p>
                 ) : (
                     <ProductList products={products} />  
-                )};
+                )}
             </div>
         </AuthenticatedLayout>
     );

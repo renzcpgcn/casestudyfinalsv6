@@ -4,6 +4,7 @@ use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ProfileController;
+
 // Inertia routes
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -11,6 +12,8 @@ Route::get('/', function () {
         'canRegister' => Route::has('register'),
     ]);
 });
+
+// Profile routes
 Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
 
 // Dashboard route
@@ -18,35 +21,29 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-
 // Product routes for Inertia
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/products', function () {
-        return Inertia::render('ProductList'); // This is for the Inertia page
-    });
+    // Route to list all products
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 
+    // Route to store a new product
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+
+    // Route to show the form for adding new products
     Route::get('/add-product', function () {
         return Inertia::render('ProductAddItem'); // Page for adding new products
-    });
-    Route::get('/edit-product/{id}', function ($id) {
-        // Fetch the product data from the database
-        $product = \App\Models\Product::findOrFail($id);
-        
-        // Render the ProductEditItem page with the product data
-        return Inertia::render('ProductEditItem', ['product' => $product]);
-    });
-    Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
+    })->name('products.create');
+    Route::put('/products/{product_id}', [ProductController::class, 'update'])->name('products.update');
 
-    
-});
-// In routes/api.php
-Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
 
-Route::middleware('auth:sanctum')->get('/products', [ProductController::class, 'index']);
+    // Route to show the form for editing an existing product
+    Route::get('/edit-product/{product_id}', [ProductController::class, 'edit'])->name('products.edit');
 
-// API routes for product management
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('/products', ProductController::class); // This will create routes like /api/products
+    // Route to update an existing product
+    Route::put('/products/{product_id}', [ProductController::class, 'update'])->name('products.update');
+
+    // Route to delete a product (optional, if you want to implement it)
+    Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('products.destroy');
 });
 
 // Authentication routes

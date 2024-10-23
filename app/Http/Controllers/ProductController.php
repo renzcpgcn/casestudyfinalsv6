@@ -13,107 +13,61 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::all();
-        return response()->json($products);
+        return response()->json($products); // Return products as JSON
     }
-    
 
-    // Store a new product
     public function store(Request $request)
     {
-        // Validate the incoming request data
+        // Validate incoming request data
         $validatedData = $request->validate([
-            'barcode' => 'required|string|unique:products,barcode,' , // Allow same barcode for the current product
             'product_name' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric',
             'available_quantity' => 'required|integer',
             'category' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-        
-    
-        try {
-            // Handle the file upload
-            $imageName = null;
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                $image->move(public_path('uploads'), $imageName);
-            }
-    
-            // Save the product data into the database
-            $product = new Product();
-            $product->product_name = $request->input('product_name');
-            $product->barcode = $request->input('barcode');
-            $product->description = $request->input('description');
-            $product->price = $request->input('price');
-            $product->available_quantity = $request->input('available_quantity');
-            $product->category = $request->input('category');
-            $product->image = $imageName; // Save the image filename in the database
-            $product->save();
-    
-            // Redirect with a success message
-            return redirect()->route('dashboard')->with('success', 'Product added successfully.');
-    
-        } catch (\Exception $e) {
-            // Log the error for debugging purposes
-            Log::error('Error storing product: ' . $e->getMessage());
-            
-            // Redirect back with an error message
-            return redirect()->back()->withErrors('Error adding product. Please try again.');
-        }
-    }
-    
 
-    // Show a specific product
-    public function show($id)
+        // Create and save the new product
+        $product = new Product();
+        $product->product_name = $request->input('product_name');
+        $product->description = $request->input('description');
+        $product->price = $request->input('price');
+        $product->available_quantity = $request->input('available_quantity');
+        $product->category = $request->input('category');
+        $product->barcode = $request->input('barcode'); // Assuming you have this field
+
+        $product->save();
+
+        return response()->json($product, 201);
+    }
+
+    // Show the form for editing an existing product
+    public function edit($product_id) // Change this to product_id
     {
-        return Product::findOrFail($id);
+        // Find the product by product_id
+        $product = Product::where('product_id', $product_id)->firstOrFail();
+
+        // Render the ProductEditItem view with the product data
+        return Inertia::render('ProductEditItem', ['product' => $product]);
     }
 
     // Update a product
-
-    // Edit a specific product
-
-    public function update(Request $request, $id)
+    public function update(Request $request, $product_id)
     {
-        // Use the $id variable here
-        $validatedData = $request->validate([
-            'barcode' => 'required|string|unique:products,barcode,' . $id, // Make sure to include $id here
-            'product_name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric',
-            'available_quantity' => 'required|integer',
-            'category' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        // Fetch the product by product_id
+        $product = Product::findOrFail($product_id);
     
-        $product = Product::findOrFail($id);  // Use the $id to find the product
+        // Update the product with the request data
+        $product->update($request->all());
     
-        // Handle image upload and update the product
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('uploads'), $imageName);
-    
-            // Delete old image if exists
-            if ($product->image && file_exists(public_path('uploads/' . $product->image))) {
-                unlink(public_path('uploads/' . $product->image));
-            }
-    
-            $validatedData['image'] = $imageName;  // Update with new image
-        }
-    
-        $product->update($validatedData);
-    
-        return redirect()->route('dashboard')->with('success', 'Product updated successfully.');
+        // Return a response or redirect as needed
+   
     }
-    
-    
+
     // Delete a product
-    public function destroy($id)
+    public function destroy($product_id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::where('product_id', $product_id)->firstOrFail();
         $product->delete();
 
         return response()->noContent();

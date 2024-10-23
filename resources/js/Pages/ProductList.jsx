@@ -1,47 +1,38 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col } from 'react-bootstrap';
-import ProductItem from './ProductItem';
+import { Row, Col } from 'react-bootstrap'; // Import Bootstrap components for layout
+import ProductItem from './ProductItem'; // Adjust the import path if necessary
+import axiosInstance from '../axiosInstance'; // Adjusted relative path
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchProducts = async () => {
             try {
-                const response = await fetch('/products'); // Correct endpoint
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                console.log(data); // Check output
-                setProducts(data); // Set state with the fetched data
+                const response = await axiosInstance.get('/products'); // Fetching from the defined route
+                setProducts(response.data); // Assuming the response data is an array of products
             } catch (error) {
-                console.error('Error fetching products:', error);
+                setError(error.response ? error.response.data : 'Error fetching products');
             }
         };
 
-        fetchData();
+        fetchProducts();
     }, []);
 
-    
-
-    
-        return (
-            <Row className="mt-4">
-                {products.length === 0 ? (
-                    <p>No products available.</p>
-                ) : (
-                    products.map(product => (
-                        <Col md={4} key={product.id} className="mb-4">
-                            <ProductItem product={product} />
-                        </Col>
-                    ))
-                )}
+    return (
+        <div  >
+            <h1 style={{ textAlign: 'center', fontFamily: 'Times New Roman' }}>Product List</h1>
+            {error && <p>Error fetching products: {error}</p>}
+            <Row>
+                {products.map(product => (
+                    <Col key={product.product_id} xs={12} sm={6} md={4} lg={3} className="mb-4">
+                        <ProductItem product={product} /> {/* Use ProductItem for each product */}
+                    </Col>
+                ))}
             </Row>
-        );
-    };
-    
-    
+        </div>
+    );
+};
 
-
-export default ProductList;
+export default ProductList; // Exporting the component at the end

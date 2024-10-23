@@ -1,194 +1,152 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Form, Button, Row, Col, Image } from 'react-bootstrap';
-import axios from 'axios';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import InputError from '@/Components/InputError';
+import InputLabel from '@/Components/InputLabel';
+import PrimaryButton from '@/Components/PrimaryButton';
+import TextInput from '@/Components/TextInput';
+import GuestLayout from '@/Layouts/GuestLayout';
+import { Head, useForm, usePage, Link } from '@inertiajs/react';
 import { Inertia } from '@inertiajs/inertia';
 
-const ProductEditItem = ({ product }) => {
-    const [formData, setFormData] = useState({
-        product_name: '',
-        barcode: '',
-        description: '',
-        price: '',
-        available_quantity: '',
-        category: '',
-        image: null, // Set the initial state for the image to null for a file
+export default function ProductEditItem({ className = '' }) {
+    const { product } = usePage().props;
+    const { flash } = usePage().props;
+
+    const { data, setData, put, errors, processing } = useForm({
+        product_name: product.product_name,
+        barcode: product.barcode,
+        description: product.description,
+        price: product.price,
+        available_quantity: product.available_quantity,
+        category: product.category,
     });
 
-    const [previewImage, setPreviewImage] = useState(null); // State for image preview
-
-    // Load existing product data if it is provided
-    useEffect(() => {
-        if (product) {
-            setFormData({
-                product_name: product.product_name || '',
-                barcode: product.barcode || '',
-                description: product.description || '',
-                price: product.price || '',
-                available_quantity: product.available_quantity || '',
-                category: product.category || '',
-                image: null, // Image handled by file input
-            });
-            // Adjust this if product.image only contains the filename
-            setPreviewImage(product.image ? `/uploads/${product.image}` : null);
-        }
-    }, [product]);
-    
-
-    // Handle input changes
-    const handleInputChange = (e) => {
-        if (e.target.name === 'image') {
-            const file = e.target.files[0];
-            setFormData({ ...formData, image: file });
-            setPreviewImage(URL.createObjectURL(file));
-        } else {
-            setFormData({ ...formData, [e.target.name]: e.target.value });
-        }
-    };
-
-    // Handle form submission
-    const handleSubmit = async (e) => {
+    const submit = (e) => {
         e.preventDefault();
-        const productData = new FormData(); // FormData is required for file uploads
 
-        // Append the other form data
-        productData.append('product_name', formData.product_name);
-        productData.append('barcode', formData.barcode);
-        productData.append('description', formData.description);
-        productData.append('price', formData.price);
-        productData.append('available_quantity', formData.available_quantity);
-        productData.append('category', formData.category);
-        productData.append('image', formData.image); // Append the image file
+        // Initialize FormData and append all fields
+        const productData = new FormData();
+        productData.append('product_name', data.product_name);
+        productData.append('barcode', data.barcode); // Include barcode for submission
+        productData.append('description', data.description);
+        productData.append('price', data.price);
+        productData.append('available_quantity', data.available_quantity);
+        productData.append('category', data.category);
 
-        try {
-            await axios.post('/products', productData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            console.log("Product added successfully");
-            Inertia.visit('/dashboard'); // Use Inertia to navigate to dashboard
-        } catch (error) {
-            console.error("Error adding product:", error.response ? error.response.data : error);
-        }
-    };
-
-    const handleCancel = () => {
-        // Redirect to the dashboard
-        Inertia.visit('/dashboard');
+        // Submit the form data using PUT
+        put(route('products.update', product.product_id), {
+            data: productData,
+            onSuccess: () => {
+                console.log('Product updated successfully!');
+                Inertia.visit('/dashboard'); // Navigate to dashboard after success
+            },
+            onError: (errors) => console.log(errors), // Log any errors
+        });
     };
 
     return (
-        <Container style={{ width: '600px', padding: '30px', marginTop: '50px' }}>
-            <h2 className="text-center mb-4">Edit Product</h2>
-            <Form onSubmit={handleSubmit} encType="multipart/form-data">
-                {/* Form fields */}
-                <Form.Group as={Row} controlId="formProductName">
-                    <Form.Label column sm={4}>Product Name</Form.Label>
-                    <Col sm={8}>
-                        <Form.Control
-                            type="text"
+        <GuestLayout>
+            <Head title="Edit Product" />
+
+            <div className="container mt-4">
+                <h2 className="text-center">Edit Product</h2> {/* Title added here */}
+
+                <form onSubmit={submit} className={className}>
+                    {flash?.success && <div className="alert alert-success">{flash.success}</div>}
+
+                    <div className="mt-4">
+                        <InputLabel htmlFor="product_name" value="Product Name" />
+                        <TextInput
+                            id="product_name"
                             name="product_name"
-                            value={formData.product_name}
-                            onChange={handleInputChange}
+                            value={data.product_name}
+                            className="mt-1 block w-full"
+                            onChange={(e) => setData('product_name', e.target.value)}
                             required
                         />
-                    </Col>
-                </Form.Group>
+                        <InputError message={errors.product_name} className="mt-2" />
+                    </div>
 
-                <Form.Group as={Row} controlId="formBarcode">
-                    <Form.Label column sm={4}>Barcode</Form.Label>
-                    <Col sm={8}>
-                        <Form.Control
-                            type="text"
+                    <div className="mt-4">
+                        <InputLabel htmlFor="barcode" value="Barcode" />
+                        <TextInput
+                            id="barcode"
                             name="barcode"
-                            value={formData.barcode}
-                            onChange={handleInputChange}
-                            required
+                            value={data.barcode}
+                            className="mt-1 block w-full"
+                            readOnly // Make the input read-only
+                            plaintext // Makes it look like a label
                         />
-                    </Col>
-                </Form.Group>
+                        <InputError message={errors.barcode} className="mt-2" />
+                    </div>
 
-                <Form.Group as={Row} controlId="formDescription">
-                    <Form.Label column sm={4}>Description</Form.Label>
-                    <Col sm={8}>
-                        <Form.Control
-                            as="textarea"
+                    <div className="mt-4">
+                        <InputLabel htmlFor="description" value="Description" />
+                        <TextInput
+                            id="description"
                             name="description"
-                            value={formData.description}
-                            onChange={handleInputChange}
+                            value={data.description}
+                            className="mt-1 block w-full"
+                            onChange={(e) => setData('description', e.target.value)}
                             required
-                            rows={3}
                         />
-                    </Col>
-                </Form.Group>
+                        <InputError message={errors.description} className="mt-2" />
+                    </div>
 
-                <Form.Group as={Row} controlId="formPrice">
-                    <Form.Label column sm={4}>Price</Form.Label>
-                    <Col sm={8}>
-                        <Form.Control
+                    <div className="mt-4">
+                        <InputLabel htmlFor="price" value="Price" />
+                        <TextInput
+                            id="price"
                             type="number"
                             name="price"
-                            value={formData.price}
-                            onChange={handleInputChange}
+                            value={data.price}
+                            className="mt-1 block w-full"
+                            onChange={(e) => setData('price', e.target.value)}
                             required
                         />
-                    </Col>
-                </Form.Group>
+                        <InputError message={errors.price} className="mt-2" />
+                    </div>
 
-                <Form.Group as={Row} controlId="formAvailableQuantity">
-                    <Form.Label column sm={4}>Available Quantity</Form.Label>
-                    <Col sm={8}>
-                        <Form.Control
+                    <div className="mt-4">
+                        <InputLabel htmlFor="available_quantity" value="Available Quantity" />
+                        <TextInput
+                            id="available_quantity"
                             type="number"
                             name="available_quantity"
-                            value={formData.available_quantity}
-                            onChange={handleInputChange}
+                            value={data.available_quantity}
+                            className="mt-1 block w-full"
+                            onChange={(e) => setData('available_quantity', e.target.value)}
                             required
                         />
-                    </Col>
-                </Form.Group>
+                        <InputError message={errors.available_quantity} className="mt-2" />
+                    </div>
 
-                <Form.Group as={Row} controlId="formCategory">
-                    <Form.Label column sm={4}>Category</Form.Label>
-                    <Col sm={8}>
-                        <Form.Control
-                            type="text"
+                    <div className="mt-4">
+                        <InputLabel htmlFor="category" value="Category" />
+                        <TextInput
+                            id="category"
                             name="category"
-                            value={formData.category}
-                            onChange={handleInputChange}
+                            value={data.category}
+                            className="mt-1 block w-full"
+                            onChange={(e) => setData('category', e.target.value)}
                             required
                         />
-                    </Col>
-                </Form.Group>
-
-                <Form.Group as={Row} controlId="formImage">
-                    <Form.Label column sm={4}>Image</Form.Label>
-                    <Col sm={8}>
-                        <Form.Control
-                            type="file"
-                            name="image"
-                            onChange={handleInputChange}
-                        />
-                    </Col>
-                </Form.Group>
-
-                {/* Image preview */}
-                {previewImage && (
-                    <Row className="mb-4">
-                        <Col sm={12} className="text-center">
-                            <Image src={previewImage} fluid alt="Selected Image" style={{ maxHeight: '200px' }} />
-                        </Col>
-                    </Row>
-                )}
-
-                <div className="d-grid gap-2">
-                    <Button variant="primary" type="submit" size="lg">Update</Button>
-                    <Button variant="secondary" onClick={handleCancel} size="lg">Cancel</Button>
-                </div>
-            </Form>
-        </Container>
+                        <InputError message={errors.category} className="mt-2" />
+                    </div>
+                    <div>
+                        
+                    </div>
+                    <div className="mt-4 flex items-center justify-end">
+                    <Link
+                        href={route('dashboard')}
+                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                        Go back to Dashboard
+                    </Link>
+                        <PrimaryButton className="ms-4" disabled={processing}>
+                            Save Changes
+                        </PrimaryButton>
+                    </div>
+                </form>
+            </div>
+        </GuestLayout>
     );
-};
-
-export default ProductEditItem;
+}
