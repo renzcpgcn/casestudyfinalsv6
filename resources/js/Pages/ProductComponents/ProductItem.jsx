@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from 'react-bootstrap';
 import { Inertia } from '@inertiajs/inertia'; 
-import axiosInstance from '../axiosInstance'; // Adjusted relative path
+import axiosInstance from '../../axiosInstance'; // Adjusted relative path
 import PrimaryButton from '@/Components/PrimaryButton'; // Ensure the correct import path
 
 const ProductItem = ({ product }) => {
@@ -55,7 +55,7 @@ const ProductItem = ({ product }) => {
                     {/* Use a styled button for Delete with grey color */}
                     <PrimaryButton 
                         className="ml-2" 
-                        style={{ backgroundColor: 'grey', borderColor: 'grey' }} 
+                        style={{ backgroundColor: 'red', borderColor: 'grey' }} 
                         onClick={() => handleDelete(product.product_id)}>
                         Delete
                     </PrimaryButton>

@@ -4,10 +4,11 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import axiosInstance from '../axiosInstance'; // Adjusted relative path
+import { useState } from 'react';
+import axiosInstance from '../../axiosInstance'; // Adjusted relative path
 
 export default function ProductAddItem() {
-    const { data, setData, processing, errors, reset } = useForm({
+    const { data, setData, processing, reset } = useForm({
         product_name: '',
         description: '',
         price: '',
@@ -16,23 +17,49 @@ export default function ProductAddItem() {
         barcode: '', // Assuming you have a barcode input
     });
 
+    const [inputErrors, setInputErrors] = useState({});
+    const [successMessage, setSuccessMessage] = useState('');
+    const [serverError, setServerError] = useState(null);
+
     const submit = async (e) => {
         e.preventDefault();
 
         if (processing) return; // Prevent multiple submissions
 
+        // Validate inputs manually
+        const newInputErrors = {};
+        if (!data.product_name) newInputErrors.product_name = 'Product name is required';
+        if (!data.description) newInputErrors.description = 'Description is required';
+        if (!data.price) newInputErrors.price = 'Price is required';
+        if (!data.available_quantity) newInputErrors.available_quantity = 'Available quantity is required';
+        if (!data.category) newInputErrors.category = 'Category is required';
+
+        if (Object.keys(newInputErrors).length > 0) {
+            setInputErrors(newInputErrors);
+            return;
+        }
+
         try {
-            // Log the data being submitted for debugging
-            console.log('Submitting product:', data);
+            // Clear any previous error messages
+            setServerError(null);
 
             const response = await axiosInstance.post('/products', data);
             console.log('Product added:', response.data);
 
-            // Reset form fields after successful submission
-            reset(); // This will reset all fields at once
+            // Display success message
+            setSuccessMessage('Product Successfully Added');
+
+            // Clear form fields and errors
+            reset();
+            setInputErrors({});
+
+            // Remove success message after 3 seconds
+            setTimeout(() => setSuccessMessage(''), 3000);
+
         } catch (error) {
             console.error('Error adding product:', error.response?.data || error.message);
-            // Handle error accordingly
+            // Handle server-side validation errors
+            setServerError(error.response?.data.errors || 'Something went wrong.');
         }
     };
 
@@ -40,18 +67,52 @@ export default function ProductAddItem() {
         <GuestLayout>
             <Head title="Add Product" />
 
+            {/* Add Product Title */}
+            <h1 style={{ textAlign: 'center', fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>
+                Add Product
+            </h1>
+
             <form onSubmit={submit}>
+                {successMessage && (
+                    <div
+                        style={{
+                            color: 'green',
+                            backgroundColor: '#d1fae5',
+                            padding: '10px',
+                            borderRadius: '5px',
+                            textAlign: 'center',
+                            marginBottom: '15px',
+                        }}
+                    >
+                        {successMessage}
+                    </div>
+                )}
+
+                {serverError && (
+                    <div
+                        style={{
+                            color: 'red',
+                            backgroundColor: '#fde2e2',
+                            padding: '10px',
+                            borderRadius: '5px',
+                            textAlign: 'center',
+                            marginBottom: '15px',
+                        }}
+                    >
+                        {serverError}
+                    </div>
+                )}
+
                 <div>
                     <InputLabel htmlFor="product_name" value="Product Name" />
                     <TextInput
                         id="product_name"
                         name="product_name"
                         value={data.product_name}
-                        className="mt-1 block w-full"
+                        className={`mt-1 block w-full ${inputErrors.product_name ? 'border-red-500' : ''}`}
                         onChange={(e) => setData('product_name', e.target.value)}
-                        required
                     />
-                    <InputError message={errors.product_name} className="mt-2" />
+                    <InputError message={inputErrors.product_name} className="mt-2 text-red-500" />
                 </div>
 
                 <div className="mt-4">
@@ -60,11 +121,10 @@ export default function ProductAddItem() {
                         id="description"
                         name="description"
                         value={data.description}
-                        className="mt-1 block w-full"
+                        className={`mt-1 block w-full ${inputErrors.description ? 'border-red-500' : ''}`}
                         onChange={(e) => setData('description', e.target.value)}
-                        required
                     />
-                    <InputError message={errors.description} className="mt-2" />
+                    <InputError message={inputErrors.description} className="mt-2 text-red-500" />
                 </div>
 
                 <div className="mt-4">
@@ -74,11 +134,10 @@ export default function ProductAddItem() {
                         type="number"
                         name="price"
                         value={data.price}
-                        className="mt-1 block w-full"
+                        className={`mt-1 block w-full ${inputErrors.price ? 'border-red-500' : ''}`}
                         onChange={(e) => setData('price', e.target.value)}
-                        required
                     />
-                    <InputError message={errors.price} className="mt-2" />
+                    <InputError message={inputErrors.price} className="mt-2 text-red-500" />
                 </div>
 
                 <div className="mt-4">
@@ -88,11 +147,10 @@ export default function ProductAddItem() {
                         type="number"
                         name="available_quantity"
                         value={data.available_quantity}
-                        className="mt-1 block w-full"
+                        className={`mt-1 block w-full ${inputErrors.available_quantity ? 'border-red-500' : ''}`}
                         onChange={(e) => setData('available_quantity', e.target.value)}
-                        required
                     />
-                    <InputError message={errors.available_quantity} className="mt-2" />
+                    <InputError message={inputErrors.available_quantity} className="mt-2 text-red-500" />
                 </div>
 
                 <div className="mt-4">
@@ -101,14 +159,11 @@ export default function ProductAddItem() {
                         id="category"
                         name="category"
                         value={data.category}
-                        className="mt-1 block w-full"
+                        className={`mt-1 block w-full ${inputErrors.category ? 'border-red-500' : ''}`}
                         onChange={(e) => setData('category', e.target.value)}
-                        required
                     />
-                    <InputError message={errors.category} className="mt-2" />
+                    <InputError message={inputErrors.category} className="mt-2 text-red-500" />
                 </div>
-
-               
 
                 <div className="mt-4 flex items-center justify-end">
                     <Link

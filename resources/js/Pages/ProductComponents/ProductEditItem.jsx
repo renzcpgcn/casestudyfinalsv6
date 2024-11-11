@@ -5,6 +5,7 @@ import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, useForm, usePage, Link } from '@inertiajs/react';
 import { Inertia } from '@inertiajs/inertia';
+import { useState } from 'react';
 
 export default function ProductEditItem({ className = '' }) {
     const { product } = usePage().props;
@@ -19,8 +20,31 @@ export default function ProductEditItem({ className = '' }) {
         category: product.category,
     });
 
+    const [inputErrors, setInputErrors] = useState({});
+
+    const validateInputs = () => {
+        const newInputErrors = {};
+        if (!data.product_name) newInputErrors.product_name = 'Product name is required.';
+        if (!data.description) newInputErrors.description = 'Description is required.';
+        if (!data.price) newInputErrors.price = 'Price is required.';
+        if (!data.available_quantity) newInputErrors.available_quantity = 'Available quantity is required.';
+        if (!data.category) newInputErrors.category = 'Category is required.';
+
+        return newInputErrors;
+    };
+
     const submit = (e) => {
         e.preventDefault();
+
+        // Validate inputs
+        const newInputErrors = validateInputs();
+        if (Object.keys(newInputErrors).length > 0) {
+            setInputErrors(newInputErrors);
+            return;
+        }
+        
+        // Clear any previous errors
+        setInputErrors({});
 
         // Initialize FormData and append all fields
         const productData = new FormData();
@@ -47,7 +71,7 @@ export default function ProductEditItem({ className = '' }) {
             <Head title="Edit Product" />
 
             <div className="container mt-4">
-                <h2 className="text-center">Edit Product</h2> {/* Title added here */}
+                <h2 className="text-center">Edit Product</h2>
 
                 <form onSubmit={submit} className={className}>
                     {flash?.success && <div className="alert alert-success">{flash.success}</div>}
@@ -58,11 +82,11 @@ export default function ProductEditItem({ className = '' }) {
                             id="product_name"
                             name="product_name"
                             value={data.product_name}
-                            className="mt-1 block w-full"
+                            className={`mt-1 block w-full ${inputErrors.product_name ? 'border-red-500' : ''}`}
                             onChange={(e) => setData('product_name', e.target.value)}
-                            required
+                            
                         />
-                        <InputError message={errors.product_name} className="mt-2" />
+                        <InputError message={inputErrors.product_name || errors.product_name} className="mt-2" />
                     </div>
 
                     <div className="mt-4">
@@ -84,11 +108,11 @@ export default function ProductEditItem({ className = '' }) {
                             id="description"
                             name="description"
                             value={data.description}
-                            className="mt-1 block w-full"
+                            className={`mt-1 block w-full ${inputErrors.description ? 'border-red-500' : ''}`}
                             onChange={(e) => setData('description', e.target.value)}
-                            required
+                            
                         />
-                        <InputError message={errors.description} className="mt-2" />
+                        <InputError message={inputErrors.description || errors.description} className="mt-2" />
                     </div>
 
                     <div className="mt-4">
@@ -98,11 +122,11 @@ export default function ProductEditItem({ className = '' }) {
                             type="number"
                             name="price"
                             value={data.price}
-                            className="mt-1 block w-full"
+                            className={`mt-1 block w-full ${inputErrors.price ? 'border-red-500' : ''}`}
                             onChange={(e) => setData('price', e.target.value)}
-                            required
+                          
                         />
-                        <InputError message={errors.price} className="mt-2" />
+                        <InputError message={inputErrors.price || errors.price} className="mt-2" />
                     </div>
 
                     <div className="mt-4">
@@ -112,11 +136,11 @@ export default function ProductEditItem({ className = '' }) {
                             type="number"
                             name="available_quantity"
                             value={data.available_quantity}
-                            className="mt-1 block w-full"
+                            className={`mt-1 block w-full ${inputErrors.available_quantity ? 'border-red-500' : ''}`}
                             onChange={(e) => setData('available_quantity', e.target.value)}
-                            required
+                            
                         />
-                        <InputError message={errors.available_quantity} className="mt-2" />
+                        <InputError message={inputErrors.available_quantity || errors.available_quantity} className="mt-2" />
                     </div>
 
                     <div className="mt-4">
@@ -125,22 +149,20 @@ export default function ProductEditItem({ className = '' }) {
                             id="category"
                             name="category"
                             value={data.category}
-                            className="mt-1 block w-full"
+                            className={`mt-1 block w-full ${inputErrors.category ? 'border-red-500' : ''}`}
                             onChange={(e) => setData('category', e.target.value)}
-                            required
+                          
                         />
-                        <InputError message={errors.category} className="mt-2" />
+                        <InputError message={inputErrors.category || errors.category} className="mt-2" />
                     </div>
-                    <div>
-                        
-                    </div>
+
                     <div className="mt-4 flex items-center justify-end">
-                    <Link
-                        href={route('dashboard')}
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Go back to Dashboard
-                    </Link>
+                        <Link
+                            href={route('dashboard')}
+                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        >
+                            Go back to Dashboard
+                        </Link>
                         <PrimaryButton className="ms-4" disabled={processing}>
                             Save Changes
                         </PrimaryButton>

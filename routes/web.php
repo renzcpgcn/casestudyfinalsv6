@@ -34,8 +34,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('ProductAddItem'); // Page for adding new products
     })->name('products.create');
     Route::put('/products/{product_id}', [ProductController::class, 'update'])->name('products.update');
-
-
     // Route to show the form for editing an existing product
     Route::get('/edit-product/{product_id}', [ProductController::class, 'edit'])->name('products.edit');
 
@@ -44,6 +42,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Route to delete a product (optional, if you want to implement it)
     Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+
 });
 
 // Authentication routes
