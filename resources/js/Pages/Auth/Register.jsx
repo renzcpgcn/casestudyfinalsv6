@@ -4,6 +4,8 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -11,6 +13,8 @@ export default function Register() {
         email: '',
         password: '',
         password_confirmation: '',
+        phone_number: '',
+        role: 'user', // Default role is 'user'
     });
 
     const submit = (e) => {
@@ -61,6 +65,25 @@ export default function Register() {
                 </div>
 
                 <div className="mt-4">
+                    <InputLabel htmlFor="phone_number" value="Phone Number" />
+
+                    <PhoneInput
+                        country={'ph'} // Default country to Philippines
+                        value={data.phone_number}
+                        onChange={(value) => setData('phone_number', value)}
+                        inputProps={{
+                            id: 'phone_number',
+                            name: 'phone_number',
+                            required: true,
+                            autoFocus: false,
+                        }}
+                        className="mt-1 block w-full"
+                    />
+
+                    <InputError message={errors.phone_number} className="mt-2" />
+                </div>
+
+                <div className="mt-4">
                     <InputLabel htmlFor="password" value="Password" />
 
                     <TextInput
@@ -100,6 +123,37 @@ export default function Register() {
                         message={errors.password_confirmation}
                         className="mt-2"
                     />
+                </div>
+
+                <div className="mt-4">
+                    <InputLabel htmlFor="role" value="Role" />
+
+                    <div className="flex items-center mt-2">
+                        <label className="mr-4">
+                            <input
+                                type="radio"
+                                name="role"
+                                value="user"
+                                checked={data.role === 'user'}
+                                onChange={(e) => setData('role', e.target.value)}
+                                className="mr-1"
+                            />
+                            User
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                name="role"
+                                value="admin"
+                                checked={data.role === 'admin'}
+                                onChange={(e) => setData('role', e.target.value)}
+                                className="mr-1"
+                            />
+                            Admin
+                        </label>
+                    </div>
+
+                    <InputError message={errors.role} className="mt-2" />
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">

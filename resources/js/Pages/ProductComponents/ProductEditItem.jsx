@@ -42,7 +42,7 @@ export default function ProductEditItem({ className = '' }) {
             setInputErrors(newInputErrors);
             return;
         }
-        
+
         // Clear any previous errors
         setInputErrors({});
 
@@ -84,7 +84,7 @@ export default function ProductEditItem({ className = '' }) {
                             value={data.product_name}
                             className={`mt-1 block w-full ${inputErrors.product_name ? 'border-red-500' : ''}`}
                             onChange={(e) => setData('product_name', e.target.value)}
-                            
+
                         />
                         <InputError message={inputErrors.product_name || errors.product_name} className="mt-2" />
                     </div>
@@ -110,7 +110,7 @@ export default function ProductEditItem({ className = '' }) {
                             value={data.description}
                             className={`mt-1 block w-full ${inputErrors.description ? 'border-red-500' : ''}`}
                             onChange={(e) => setData('description', e.target.value)}
-                            
+
                         />
                         <InputError message={inputErrors.description || errors.description} className="mt-2" />
                     </div>
@@ -124,7 +124,7 @@ export default function ProductEditItem({ className = '' }) {
                             value={data.price}
                             className={`mt-1 block w-full ${inputErrors.price ? 'border-red-500' : ''}`}
                             onChange={(e) => setData('price', e.target.value)}
-                          
+
                         />
                         <InputError message={inputErrors.price || errors.price} className="mt-2" />
                     </div>
@@ -138,7 +138,7 @@ export default function ProductEditItem({ className = '' }) {
                             value={data.available_quantity}
                             className={`mt-1 block w-full ${inputErrors.available_quantity ? 'border-red-500' : ''}`}
                             onChange={(e) => setData('available_quantity', e.target.value)}
-                            
+
                         />
                         <InputError message={inputErrors.available_quantity || errors.available_quantity} className="mt-2" />
                     </div>
@@ -151,7 +151,7 @@ export default function ProductEditItem({ className = '' }) {
                             value={data.category}
                             className={`mt-1 block w-full ${inputErrors.category ? 'border-red-500' : ''}`}
                             onChange={(e) => setData('category', e.target.value)}
-                          
+
                         />
                         <InputError message={inputErrors.category || errors.category} className="mt-2" />
                     </div>

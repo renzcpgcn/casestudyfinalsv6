@@ -3,6 +3,21 @@
 use Illuminate\Support\Str;
 
 return [
+  'session' => [
+    'driver' => env('SESSION_DRIVER', 'cookie'),
+    'lifetime' => 120,
+    'expire_on_close' => false,
+    'encrypt' => false,
+    'files' => storage_path('framework/sessions'),
+    'cookie' => 'laravel_session',
+    'path' => '/',
+    'domain' => env('SESSION_DOMAIN', null),
+    'secure' => env('SESSION_SECURE_COOKIE', false), // Make sure this is set correctly for your environment
+    'http_only' => true,
+    'same_site' => 'lax',
+
+],
+
 
     /*
     |--------------------------------------------------------------------------

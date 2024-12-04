@@ -40,7 +40,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                                     <rect x="17" y="14" width="2" height="8" fill="red" />
                                 </svg>
                             </div>
-                            
+
 
                             <nav className="-mx-3 flex flex-1 justify-end">
                                 {auth.user ? (
@@ -70,7 +70,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                         </header>
 
                         <main className="mt-6">
-                                
+
                             <div className="flex flex-col items-start gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 focus:outline-none focus-visible:ring-[#FF2D20] md:row-span-3 lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 "
                             >
                                 <div className="relative flex items-center gap-6 lg:items-end">
@@ -99,18 +99,18 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                                             </h1>
 
                                             <p className="mt-4 text-sm/relaxed">
-                                                Welcome to Listify, the ultimate solution for 
+                                                Welcome to Listify, the ultimate solution for
                                                 managing your products efficiently and effectively.
                                                 Our user-friendly platform is designed to help your
                                                 add, update, delete, and search for products with ease.
                                                 Whether you're a small business owner, a project manager,
-                                                or a larger team, Listify has the tools you needed to 
+                                                or a larger team, Listify has the tools you needed to
                                                 take control of your product catalog.
                                             </p>
                                         </div>
                                     </div>
 
-                                    
+
                                 </div>
                             </div>
                         </main>

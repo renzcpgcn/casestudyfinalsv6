@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { Inertia } from '@inertiajs/inertia'; // Import Inertia here
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 import axiosInstance from '../axiosInstance'; // Adjusted relative path
-import { Inertia } from '@inertiajs/inertia';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ProductList from './ProductComponents/ProductList';
-import PrimaryButton from '@/Components/PrimaryButton';
 import { Form } from 'react-bootstrap';
+import UserProductList from './UserComponents/UserProductList';
+import PrimaryButton from '@/Components/PrimaryButton';
 
-const Dashboard = () => {
+const UserDashboard = () => {
     const [products, setProducts] = useState([]); // All products
     const [filteredProducts, setFilteredProducts] = useState([]); // Filtered products based on search
     const [loading, setLoading] = useState(true);
@@ -21,6 +22,7 @@ const Dashboard = () => {
 
     const fetchProducts = async () => {
         try {
+            // Fetch products for the user
             const response = await axiosInstance.get('/api/products'); // Use /api/products instead of /products
             setProducts(response.data);
             setFilteredProducts(response.data); // Display all products initially
@@ -32,9 +34,11 @@ const Dashboard = () => {
         }
     };
 
-    const handleAddProduct = () => {
-        Inertia.visit('/add-product');
+    const handleViewCart = async () => {
+        Inertia.visit('/cart'); // Navigate to the Cart Page
     };
+
+
 
     const handleSearchInput = (e) => {
         const inputValue = e.target.value;
@@ -57,11 +61,11 @@ const Dashboard = () => {
                 <div className="d-flex flex-column align-items-start">
                     <div className="d-flex justify-content-between w-100 align-items-center">
                         <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                            Product Dashboard
+                            User Dashboard
                         </h2>
                         <div className="ml-auto">
-                            <PrimaryButton className="ms-4" onClick={handleAddProduct}>
-                                Add Product
+                            <PrimaryButton className="ms-4" onClick={handleViewCart}>
+                                View Cart
                             </PrimaryButton>
                         </div>
                     </div>
@@ -79,18 +83,18 @@ const Dashboard = () => {
                 </div>
             }
         >
-            <Head title="Product Dashboard" />
+            <Head title="User Dashboard" />
             <div>
                 {loading ? (
                     <p>Loading products...</p>
                 ) : error ? (
                     <p>{error}</p>
                 ) : (
-                    <ProductList products={filteredProducts} />
+                    <UserProductList products={filteredProducts} />
                 )}
             </div>
         </AuthenticatedLayout>
     );
 };
 
-export default Dashboard;
+export default UserDashboard;

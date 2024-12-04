@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Log;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -10,12 +9,16 @@ use Inertia\Inertia;
 class ProductController extends Controller
 {
     // Get all products
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::all();
-        return response()->json($products); // Return products as JSON
+        return response()
+            ->json(Product::all(), 200)
+            ->header('Access-Control-Allow-Origin', '*')
+            ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+            ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     }
 
+    // Create a new product
     public function store(Request $request)
     {
         // Validate incoming request data
@@ -25,55 +28,75 @@ class ProductController extends Controller
             'price' => 'required|numeric',
             'available_quantity' => 'required|integer',
             'category' => 'required|string|max:255',
+            'barcode' => 'nullable|string', // Optional field
         ]);
 
-        // Create and save the new product
-        $product = new Product();
-        $product->product_name = $request->input('product_name');
-        $product->description = $request->input('description');
-        $product->price = $request->input('price');
-        $product->available_quantity = $request->input('available_quantity');
-        $product->category = $request->input('category');
-        $product->barcode = $request->input('barcode'); // Assuming you have this field
+        // Create the new product
+        $product = Product::create($validatedData);
 
-        $product->save();
-
-        return response()->json($product, 201);
+        return response()
+            ->json($product, 201) // HTTP 201: Created
+            ->header('Access-Control-Allow-Origin', '*')
+            ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+            ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     }
 
-    // Show the form for editing an existing product
-    public function edit($product_id) // Change this to product_id
+    // Show details of a specific product
+    public function show(Product $product)
     {
-        // Find the product by product_id
-        $product = Product::where('product_id', $product_id)->firstOrFail();
-
-        // Render the ProductEditItem view with the product data
-        return Inertia::render('ProductEditItem', ['product' => $product]);
+        return response()
+            ->json($product, 200)
+            ->header('Access-Control-Allow-Origin', '*')
+            ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+            ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     }
 
-    // Update a product
+    // Show the edit form for a specific product
+    public function edit($product_id)
+    {
+        $product = Product::find($product_id);
+
+        // Check if the product exists
+        if (!$product) {
+            return redirect()->route('products.index')->with('error', 'Product not found!');
+        }
+
+        return Inertia::render('ProductComponents/ProductEditItem', [
+            'product' => $product,
+        ]);
+    }
+
+    // Update an existing product
     public function update(Request $request, $product_id)
     {
-        // Fetch the product by product_id
+        // Find the product by its ID
         $product = Product::findOrFail($product_id);
-    
-        // Update the product with the request data
-        $product->update($request->all());
-    
-        // Return a response or redirect as needed
-   
+
+        // Validate the incoming data
+        $validatedData = $request->validate([
+            'product_name' => 'required|string|max:255',
+            'barcode' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric',
+            'available_quantity' => 'required|integer',
+            'category' => 'required|string|max:255',
+        ]);
+
+        // Update the product with validated data
+        $product->update($validatedData);
+
+        // Return an Inertia response to reload the page or navigate after the update
+
     }
 
     // Delete a product
-    public function destroy($product_id)
+    public function destroy(Product $product)
     {
-        $product = Product::where('product_id', $product_id)->firstOrFail();
-        $product->delete();
-
-        return response()->noContent();
+        $product->delete(); // Delete the product
+        return response()
+            ->json(['message' => 'Product deleted successfully'], 200)
+            ->header('Access-Control-Allow-Origin', '*')
+            ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+            ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     }
-
-    // ProductController.php
-    
-
 }

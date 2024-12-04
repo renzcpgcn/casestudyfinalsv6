@@ -19,7 +19,7 @@ class Product extends Model
         'price',
         'available_quantity',
         'category',
-        'image',
+
     ];
 
 
@@ -42,6 +42,10 @@ class Product extends Model
     }
 
     return $barcode;
+}
+public function carts()
+{
+    return $this->hasMany(Cart::class);
 }
 
 }

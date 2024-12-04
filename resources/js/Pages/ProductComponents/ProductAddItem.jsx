@@ -43,7 +43,7 @@ export default function ProductAddItem() {
             // Clear any previous error messages
             setServerError(null);
 
-            const response = await axiosInstance.post('/products', data);
+            const response = await axiosInstance.post('/api/products', data);
             console.log('Product added:', response.data);
 
             // Display success message

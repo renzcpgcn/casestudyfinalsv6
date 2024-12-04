@@ -23,7 +23,9 @@
     "dependencies": {
         "@inertiajs/inertia": "^0.11.1",
         "bootstrap": "^5.3.3",
+        "js-cookie": "^3.0.5",
         "react-bootstrap": "^2.10.5",
-        "react-router-dom": "^6.27.0"
+        "react-phone-input-2": "^2.15.1",
+        "react-router-dom": "^6.28.0"
     }
 }

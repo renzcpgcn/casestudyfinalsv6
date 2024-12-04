@@ -16,7 +16,7 @@ class ProductSeeder extends Seeder
             'price' => 10.99,
             'available_quantity' => 100,
             'category' => 'Category A',
-            'image' => 'path/to/image1.jpg', // Example image path
+
         ]);
 
         Product::create([
@@ -26,7 +26,7 @@ class ProductSeeder extends Seeder
             'price' => 20.49,
             'available_quantity' => 50,
             'category' => 'Category B',
-            'image' => 'path/to/image2.jpg',
+        
         ]);
 
         // Add more products as needed
@@ -39,7 +39,7 @@ class ProductSeeder extends Seeder
                 'price' => rand(5, 50), // Random price between 5 and 50
                 'available_quantity' => rand(1, 200), // Random quantity
                 'category' => 'Category ' . chr(65 + $i % 3), // Cycle through categories A, B, C
-                'image' => 'path/to/image' . $i . '.jpg',
+            
             ]);
         }
     }

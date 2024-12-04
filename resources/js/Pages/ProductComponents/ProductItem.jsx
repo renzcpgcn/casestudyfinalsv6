@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card } from 'react-bootstrap';
-import { Inertia } from '@inertiajs/inertia'; 
+import { Inertia } from '@inertiajs/inertia';
 import axiosInstance from '../../axiosInstance'; // Adjusted relative path
 import PrimaryButton from '@/Components/PrimaryButton'; // Ensure the correct import path
 
@@ -10,8 +10,9 @@ const ProductItem = ({ product }) => {
     const handleDelete = async (productId) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
             try {
-                await axiosInstance.delete(`/products/${productId}`);
-                Inertia.visit('/dashboard');  
+                // Updated to use the correct API route
+                await axiosInstance.delete(`/api/products/${productId}`);
+                Inertia.visit('/dashboard');
             } catch (error) {
                 console.error('Error deleting product:', error.response ? error.response.data : error);
             }
@@ -19,8 +20,7 @@ const ProductItem = ({ product }) => {
     };
 
     const handleEdit = () => {
-        // Use product_id to navigate to the edit page
-        const productId = product.product_id; 
+        const productId = product.product_id; // Ensure correct field is used
         if (productId) {
             Inertia.visit(`/edit-product/${productId}`);
         } else {
@@ -29,13 +29,13 @@ const ProductItem = ({ product }) => {
     };
 
     return (
-        <Card style={{ 
-            backgroundColor: '#f8f9fa',  
-            width: '350px',              
-            height: '230px',             
-            display: 'flex',             
-            flexDirection: 'column',    
-            justifyContent: 'space-between' 
+        <Card style={{
+            backgroundColor: '#f8f9fa',
+            width: '350px',
+            height: '230px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
         }}>
             <Card.Img variant="top" style={{ objectFit: 'cover', height: '60%' }} />
             <Card.Body style={{ flexGrow: 1 }}>
@@ -53,10 +53,11 @@ const ProductItem = ({ product }) => {
                         Edit
                     </PrimaryButton>
                     {/* Use a styled button for Delete with grey color */}
-                    <PrimaryButton 
-                        className="ml-2" 
-                        style={{ backgroundColor: 'red', borderColor: 'grey' }} 
-                        onClick={() => handleDelete(product.product_id)}>
+                    <PrimaryButton
+                        className="ml-2"
+                        style={{ backgroundColor: 'red', borderColor: 'grey' }}
+                        onClick={() => handleDelete(product.product_id)}
+                    >
                         Delete
                     </PrimaryButton>
                 </div>

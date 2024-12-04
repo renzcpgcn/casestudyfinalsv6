@@ -12,7 +12,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('products', function (Blueprint $table) {
-            
+
             $table->increments('product_id')->unique(); // Creates an auto-incrementing primary key called product_id
             $table->string('product_name');
             $table->text('description');
