@@ -5,7 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\CartController;
-
+use App\Http\Controllers\OrderController;
 // Inertia routes
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -70,7 +70,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 Route::delete('/cart/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
 
-
+Route::get('/checkout', function () {
+    return Inertia::render('UserComponents/CheckedOutPage'); // Use the appropriate path if the page name is different
+});
+Route::post('/api/checkout', [OrderController::class, 'checkout']);
 
 // Authentication routes
 require __DIR__.'/auth.php';

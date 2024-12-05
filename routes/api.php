@@ -3,7 +3,7 @@
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\OrderController;
 // Grouping the routes for products under 'api' middleware
 Route::middleware('api')->group(function () {
     // Product routes
@@ -21,4 +21,13 @@ Route::middleware('api')->group(function () {
     Route::put('/cart/{id}', [CartController::class, 'updateCartQuantity']);
     // Route to remove a product from the cart
     Route::delete('/cart/{id}', [CartController::class, 'removeFromCart']);
+
+
+
+    // Route to store an order
+    Route::post('/orders', [OrderController::class, 'store']);
+
+    // Route to show a specific order by ID (optional)
+    Route::get('/orders/{id}', [OrderController::class, 'show']);
+
 });
