@@ -89,7 +89,7 @@ const UserDashboard = () => {
                         </h2>
                         <div className="ml-auto">
                             <PrimaryButton className="ms-4" onClick={handleViewCart}>
-                                View Cart ({cartItemCount})
+                                🛒View Cart ({cartItemCount})
                             </PrimaryButton>
                         </div>
                     </div>

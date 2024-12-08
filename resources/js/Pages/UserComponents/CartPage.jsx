@@ -113,10 +113,9 @@ const CartPage = () => {
     if (loading) return <div>Loading...</div>;
 
     return (
-        <Container className="my-5" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+        <Container className="my-5">
             <h1 className="text-center mb-4">Shopping Cart</h1>
             {error && <div className="alert alert-danger">{error}</div>}
-
             <Row className="justify-content-center">
                 {cartItems.length === 0 ? (
                     <div>Your cart is empty!</div>
@@ -124,7 +123,7 @@ const CartPage = () => {
                     cartItems.map((item) => (
                         <Col key={item.product_id} md={12} className="mb-4">
                             <Card>
-                                <Card.Body>
+                                <Card.Body style={{ backgroundColor: '#d3d3d3' }}>
                                     <div className="d-flex justify-content-between">
                                         <Card.Title>{item.product_name}</Card.Title>
                                         <Form.Check
@@ -168,16 +167,16 @@ const CartPage = () => {
                 )}
             </Row>
 
-            <div className="fixed-bottom bg-light d-flex justify-content-between align-items-center p-3">
+            <div className="fixed-bottom bg-light d-flex justify-content-between align-items-center p-3 ml-10">
                 <h4>Total Price: ${totalPrice}</h4>
 
                 {/* Place the Secondary Button and Checkout Button side by side */}
-                <div className="d-flex">
+                <div className="flex-container mr-10">
                     <SecondaryButton className="ms-4" onClick={goToDashboard}>
                         Go to Dashboard
                     </SecondaryButton>
                     {selectedItems.length > 0 && (
-                        <Button variant="success" onClick={proceedToCheckout} className="ms-4">
+                        <Button variant="success" onClick={proceedToCheckout} className="ms-4 ">
                             Proceed to Checkout
                         </Button>
                     )}
