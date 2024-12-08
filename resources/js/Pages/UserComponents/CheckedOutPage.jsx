@@ -1,7 +1,8 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Container, ListGroup, Form } from 'react-bootstrap';
+import { Card, Button, Container, ListGroup, Form, Alert } from 'react-bootstrap';
 import axios from 'axios';
+import { Inertia } from '@inertiajs/inertia';
 
 const CheckedOutPage = () => {
     const [selectedItems, setSelectedItems] = useState([]);
@@ -14,18 +15,19 @@ const CheckedOutPage = () => {
         postalCode: '',
         phone: '',
     });
+    const [paymentMethod, setPaymentMethod] = useState('gcash'); // Default payment method
+    const [orderConfirmed, setOrderConfirmed] = useState(false);
 
     useEffect(() => {
-        // Retrieve data from localStorage
-        const storedSelectedItems = JSON.parse(localStorage.getItem('selectedItems'));
-        const storedTotalPrice = JSON.parse(localStorage.getItem('totalPrice'));
+        const storedSelectedItems = JSON.parse(localStorage.getItem('selectedItems')) || [];
+        setSelectedItems(storedSelectedItems);
 
-        if (storedSelectedItems) {
-            setSelectedItems(storedSelectedItems);
-        }
-        if (storedTotalPrice) {
-            setTotalPrice(storedTotalPrice);
-        }
+        // Calculate the total price based on selected items
+        const calculatedTotalPrice = storedSelectedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        setTotalPrice(calculatedTotalPrice);
+
+        // Store total price in localStorage
+        localStorage.setItem('totalPrice', JSON.stringify(calculatedTotalPrice));
     }, []);
 
     const handleShippingChange = (e) => {
@@ -36,9 +38,13 @@ const CheckedOutPage = () => {
         });
     };
 
+    const handlePaymentChange = (e) => {
+        setPaymentMethod(e.target.value);
+    };
+
     const handleSubmitOrder = () => {
         const orderData = {
-            user_id: 1, // Example: Replace with the actual user ID
+            user_id: 1,
             name: shippingInfo.name,
             address: shippingInfo.address,
             city: shippingInfo.city,
@@ -46,17 +52,35 @@ const CheckedOutPage = () => {
             postal_code: shippingInfo.postalCode,
             phone: shippingInfo.phone,
             total_price: totalPrice,
-            payment_method: 'credit_card', // Example: Replace with selected payment method
+            payment_method: paymentMethod,
         };
 
         axios.post('/api/orders', orderData)
             .then(response => {
                 console.log('Order successfully created:', response.data);
-                // Handle the response or navigate to a success page
+
+                // Clear localStorage after the order is successful
+                localStorage.clear();
+
+                // Set the total price to 0 after clearing the cart
+                setTotalPrice(0);
+                setSelectedItems([]);
+
+                setOrderConfirmed(true);
+                //setTimeout(() => {
+               //     Inertia.visit('/cart');
+               // }, 3000); // Redirect after 3 seconds
             })
             .catch(error => {
                 console.error('There was an error creating the order:', error);
             });
+
+    };
+
+
+    const handleClearCart = () => {
+        localStorage.clear();
+        Inertia.visit('/cart');
     };
 
     return (
@@ -133,6 +157,29 @@ const CheckedOutPage = () => {
                                     required
                                 />
                             </Form.Group>
+
+                            {/* Payment Method Selection */}
+                            <Form.Group className="mt-3">
+                                <Form.Label>Payment Method</Form.Label>
+                                <div>
+                                    <Form.Check
+                                        type="radio"
+                                        label="GCASH"
+                                        name="paymentMethod"
+                                        value="gcash"
+                                        checked={paymentMethod === 'gcash'}
+                                        onChange={handlePaymentChange}
+                                    />
+                                    <Form.Check
+                                        type="radio"
+                                        label="Cash on Delivery"
+                                        name="paymentMethod"
+                                        value="cod"
+                                        checked={paymentMethod === 'cod'}
+                                        onChange={handlePaymentChange}
+                                    />
+                                </div>
+                            </Form.Group>
                         </Form>
                     </div>
                 </Card.Body>
@@ -166,6 +213,19 @@ const CheckedOutPage = () => {
                             Confirm Order
                         </Button>
                     </div>
+
+                    <div className="text-center mt-3">
+                        <Button variant="danger" onClick={handleClearCart}>
+                            Go back to Cart
+                        </Button>
+                    </div>
+
+                    {/* Display order confirmation message */}
+                    {orderConfirmed && (
+                        <Alert variant="success" className="mt-4">
+                            Thank you for your purchase! Redirecting to Cart...
+                        </Alert>
+                    )}
                 </Card.Footer>
             </Card>
         </Container>

@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 class Cart extends Model
 {
+    use HasFactory;
+
+    // Add 'selected' to the fillable array
     protected $fillable = [
-        'user_id', 'product_id', 'product_name', 'product_description', 'price', 'quantity'
+        'user_id', 'product_id', 'product_name', 'product_description', 'price', 'quantity', 'selected'
     ];
 
     public function user()
@@ -16,8 +20,7 @@ class Cart extends Model
     }
 
     public function product()
-{
-    return $this->belongsTo(Product::class);
-}
-
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

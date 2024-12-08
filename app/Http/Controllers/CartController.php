@@ -26,6 +26,9 @@ class CartController extends Controller
         }
         return response()->json(['message' => 'Cart item not found'], 404);
     }
+
+    // View cart contents
+
     // Add product to cart
     public function addToCart(Request $request)
     {
@@ -66,7 +69,7 @@ class CartController extends Controller
     $user = Auth::user();
 
     // Get the products in the user's cart
-    $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
+    $cartItems = Cart::with('product')->where('user_id', 1)->get();
 
     // Return the view with the cart items
     return view('cart.index', [
@@ -75,6 +78,8 @@ class CartController extends Controller
     ]);
 }
 // In CartController.php
+
+
 public function updateCartQuantity(Request $request, $id)
 {
     $request->validate([
@@ -95,11 +100,86 @@ public function updateCartQuantity(Request $request, $id)
 
 
     // Remove product from cart
-    public function removeFromCart($id)
+    public function destroy($id)
     {
-        $cartItem = Cart::findOrFail($id);
-        $cartItem->delete();
+        // Assuming you have a Cart model
+        $cartItem = Cart::find($id);
 
-        return response()->json(['message' => 'Product removed from cart successfully!']);
+        if ($cartItem) {
+            $cartItem->delete();
+            return response()->json(['message' => 'Item deleted successfully']);
+        } else {
+            return response()->json(['message' => 'Item not found'], 404);
+        }
     }
+
+    public function updateSelection(Request $request, $id)
+    {
+        $request->validate([
+            'selected' => 'required|boolean',
+        ]);
+
+        $cartItem = Cart::find($id);
+
+        if (!$cartItem) {
+            return response()->json(['message' => 'Cart item not found'], 404);
+        }
+
+        $cartItem->selected = $request->selected;
+        $cartItem->save();
+
+        return response()->json(['message' => 'Selection updated successfully']);
+    }
+    public function clearSelectedItems(Request $request)
+    {
+        $userId = $request->input('user_id');
+
+        // Delete items where 'selected' is 1
+        $deletedCount = Cart::where('user_id', $userId)->where('selected', 1)->delete();
+
+        if ($deletedCount > 0) {
+            return response()->json(['message' => 'Selected items cleared from the cart.'], 200);
+        }
+
+        return response()->json(['message' => 'No selected items found in the cart.'], 404);
+    }
+    public function clearSelected(Request $request)
+    {
+        $userId = $request->input('user_id');
+
+        // Assuming you have a Cart model to manage cart items
+        $deleted = Cart::where('user_id', $userId)->delete();
+
+        if ($deleted) {
+            return response()->json(['message' => 'Selected items cleared successfully.']);
+        } else {
+            return response()->json(['error' => 'No items to clear.'], 404);
+        }
+    }
+
+    public function selectAll()
+    {
+        // Update all records in the carts table to set 'selected' column to 1
+        Cart::query()->update(['selected' => 1]);
+
+        return response()->json([
+            'message' => 'All items selected successfully',
+        ]);
+    }
+
+    public function getCartItemCount(Request $request)
+    {
+        $userId = $request->query('user_id', 2); // Get user_id from query parameter
+
+        if (!$userId) {
+            return response()->json(['error' => 'user_id is required'], 400);
+        }
+
+        // Calculate the sum of quantities for the given user_id
+        $cartItemCount = Cart::where('user_id', $userId)->sum('quantity');
+
+        return response()->json(['count' => $cartItemCount]);
+    }
+
+
 }

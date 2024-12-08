@@ -26,8 +26,12 @@ const UserProductList = ({ products }) => {
             {cartMessage && <div className="text-green-500 text-center mt-2">{cartMessage}</div>}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                {products.map((product) => (
-                    <UserProductItem key={product.product_id} product={product} onAddToCart={addToCart} />
+            {products.map((product) => (
+                    <UserProductItem
+                        key={product.product_id}
+                        product={product}
+                        onAddToCart={addToCart}
+                    />
                 ))}
             </div>
         </div>

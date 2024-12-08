@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, Button, Form, Row, Col, Container } from 'react-bootstrap';
 import axios from 'axios';
 import { Inertia } from '@inertiajs/inertia';
+import SecondaryButton from '@/Components/SecondaryButton';
 
 const CartPage = () => {
     const [cartItems, setCartItems] = useState([]);
@@ -11,11 +12,20 @@ const CartPage = () => {
     const [selectedItems, setSelectedItems] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
 
+    // Fetch cart items and set each item as selected by default
     useEffect(() => {
         axios
             .get('/api/cart')
             .then((response) => {
-                setCartItems(response.data);
+                const itemsWithSelected = response.data.map((item) => ({
+                    ...item,
+                    selected: true, // Make each checkbox checked by default
+                }));
+                setCartItems(itemsWithSelected);
+                setSelectedItems(itemsWithSelected); // Initialize selectedItems with all items
+
+                // Store the cart items in localStorage
+                localStorage.setItem('selectedItems', JSON.stringify(itemsWithSelected));
                 setLoading(false);
             })
             .catch(() => {
@@ -38,44 +48,63 @@ const CartPage = () => {
             .catch(() => setError('Failed to update quantity.'));
     };
 
-    const handleRemoveFromCart = (productId) => {
+    const handleSelectItem = (item, isChecked) => {
         axios
-            .delete(`/api/cart/${productId}`)
+            .patch(`/api/cart/${item.id}/selection`, { selected: isChecked })
             .then(() => {
-                setCartItems(cartItems.filter((item) => item.product_id !== productId));
+                const updatedSelectedItems = isChecked
+                    ? [...selectedItems, item]
+                    : selectedItems.filter((selectedItem) => selectedItem.id !== item.id);
+
+                setCartItems((prevItems) =>
+                    prevItems.map((cartItem) =>
+                        cartItem.id === item.id ? { ...cartItem, selected: isChecked } : cartItem
+                    )
+                );
+
+                setSelectedItems(updatedSelectedItems);
+                localStorage.setItem('selectedItems', JSON.stringify(updatedSelectedItems));
             })
-            .catch(() => setError('Failed to remove product from cart.'));
+            .catch(() => setError('Failed to update selection.'));
     };
 
-    // Handle selecting an item
-    const handleSelectItem = (item, isChecked) => {
-        if (isChecked) {
-            setSelectedItems([...selectedItems, item]);
-        } else {
-            setSelectedItems(selectedItems.filter((selectedItem) => selectedItem.product_id !== item.product_id));
-        }
+    const handleRemoveFromCart = (id) => {
+        axios.delete(`/api/cart/${id}`)
+        .then(response => {
+            console.log('Item deleted', response.data);
+            setCartItems(cartItems.filter(item => item.id !== id)); // Remove the item from the state
+        })
+        .catch(error => {
+            console.error('Error deleting item:', error);
+        });
     };
 
     useEffect(() => {
         const total = cartItems.reduce((acc, item) => {
-            if (selectedItems.some((selectedItem) => selectedItem.product_id === item.product_id)) {
+            if (item.selected) { // Only calculate total for selected items
                 return acc + item.price * item.quantity;
             }
             return acc;
         }, 0);
-        setTotalPrice(total);
-
-        // Print the selected items in the console
-        console.log('Selected Items:', selectedItems);
+        setTotalPrice(total.toFixed(2)); // Round the total price to two decimal places
     }, [selectedItems, cartItems]);
 
     const proceedToCheckout = () => {
-        // Store selectedItems and totalPrice in localStorage
-        localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
-        localStorage.setItem('totalPrice', JSON.stringify(totalPrice));
-
-        // Proceed to Checkout page
         Inertia.visit('/checkout', {
+            method: 'get',
+            preserveScroll: true,
+        });
+    };
+
+    const goToStore = () => {
+        Inertia.visit('/store', {
+            method: 'get',
+            preserveScroll: true,
+        });
+    };
+
+    const goToDashboard = () => {
+        Inertia.visit('/dashboard', {
             method: 'get',
             preserveScroll: true,
         });
@@ -87,20 +116,6 @@ const CartPage = () => {
         <Container className="my-5" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
             <h1 className="text-center mb-4">Shopping Cart</h1>
             {error && <div className="alert alert-danger">{error}</div>}
-
-            <div className="mb-4">
-                <Form.Check
-                    type="checkbox"
-                    label="Select All for Checkout"
-                    onChange={(e) => {
-                        if (e.target.checked) {
-                            setSelectedItems(cartItems);
-                        } else {
-                            setSelectedItems([]);
-                        }
-                    }}
-                />
-            </div>
 
             <Row className="justify-content-center">
                 {cartItems.length === 0 ? (
@@ -114,7 +129,7 @@ const CartPage = () => {
                                         <Card.Title>{item.product_name}</Card.Title>
                                         <Form.Check
                                             type="checkbox"
-                                            checked={selectedItems.some((selectedItem) => selectedItem.product_id === item.product_id)}
+                                            checked={item.selected} // Each item is selected by default
                                             onChange={(e) => handleSelectItem(item, e.target.checked)}
                                         />
                                     </div>
@@ -143,7 +158,7 @@ const CartPage = () => {
                                             +
                                         </Button>
                                     </div>
-                                    <Button variant="danger" onClick={() => handleRemoveFromCart(item.product_id)}>
+                                    <Button variant="danger" onClick={() => handleRemoveFromCart(item.id)}>
                                         Remove
                                     </Button>
                                 </Card.Footer>
@@ -155,11 +170,18 @@ const CartPage = () => {
 
             <div className="fixed-bottom bg-light d-flex justify-content-between align-items-center p-3">
                 <h4>Total Price: ${totalPrice}</h4>
-                {selectedItems.length > 0 && (
-                    <Button variant="success" onClick={proceedToCheckout}>
-                        Proceed to Checkout
-                    </Button>
-                )}
+
+                {/* Place the Secondary Button and Checkout Button side by side */}
+                <div className="d-flex">
+                    <SecondaryButton className="ms-4" onClick={goToDashboard}>
+                        Go to Dashboard
+                    </SecondaryButton>
+                    {selectedItems.length > 0 && (
+                        <Button variant="success" onClick={proceedToCheckout} className="ms-4">
+                            Proceed to Checkout
+                        </Button>
+                    )}
+                </div>
             </div>
         </Container>
     );

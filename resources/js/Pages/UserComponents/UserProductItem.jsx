@@ -1,3 +1,4 @@
+import PrimaryButton from '@/Components/PrimaryButton';
 const UserProductItem = ({ product, onAddToCart }) => {
     // Ensure price is treated as a number
     const price = Number(product.price);
@@ -14,12 +15,9 @@ const UserProductItem = ({ product, onAddToCart }) => {
                 </span>
             </p>
             {product.available_quantity > 0 && (
-                <button
-                    onClick={() => onAddToCart(product)}
-                    className="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-                    Add to Cart
-                </button>
+                 <PrimaryButton className="me-2" onClick={() => onAddToCart(product)}>
+                 Add to Cart
+             </PrimaryButton>
             )}
         </div>
     );

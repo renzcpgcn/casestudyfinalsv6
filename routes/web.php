@@ -58,9 +58,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/cart', [CartController::class, 'addToCart'])->name('cart.add');
 
     // Route to remove a product from the cart
-    Route::delete('/cart/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
+    Route::delete('/cart/{id}', [CartController::class, 'removeFromCart']);
+
 });
-Route::get('/', [CartController::class, 'index']);  // Get all cart items
+Route::get('/cart', [CartController::class, 'index']);  // Get all cart items
 Route::post('/cart', [CartController::class, 'addToCart'])->name('cart.add');
 
 Route::middleware(['auth', 'verified'])->group(function () {

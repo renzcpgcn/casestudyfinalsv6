@@ -15,15 +15,17 @@ const UserDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [query, setQuery] = useState(''); // Search query
+    const [cartItemCount, setCartItemCount] = useState(0); // State for cart item count
 
     useEffect(() => {
         fetchProducts();
+        fetchCartItemCount(); // Fetch cart item count on component mount
     }, []);
 
     const fetchProducts = async () => {
         try {
             // Fetch products for the user
-            const response = await axiosInstance.get('/api/products'); // Use /api/products instead of /products
+            const response = await axiosInstance.get('/api/products');
             setProducts(response.data);
             setFilteredProducts(response.data); // Display all products initially
             setLoading(false);
@@ -34,11 +36,19 @@ const UserDashboard = () => {
         }
     };
 
+    const fetchCartItemCount = async () => {
+        try {
+            // Fetch the count of items in the user's cart
+            const response = await axiosInstance.get('/api/cart/item-count');
+            setCartItemCount(response.data.count); // Set cart item count state
+        } catch (error) {
+            console.error("Error fetching cart item count:", error);
+        }
+    };
+
     const handleViewCart = async () => {
         Inertia.visit('/cart'); // Navigate to the Cart Page
     };
-
-
 
     const handleSearchInput = (e) => {
         const inputValue = e.target.value;
@@ -65,7 +75,7 @@ const UserDashboard = () => {
                         </h2>
                         <div className="ml-auto">
                             <PrimaryButton className="ms-4" onClick={handleViewCart}>
-                                View Cart
+                                View Cart ({cartItemCount}) {/* Display cart item count here */}
                             </PrimaryButton>
                         </div>
                     </div>

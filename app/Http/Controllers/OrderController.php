@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
+use App\Models\Cart; // Import the Cart model
 class OrderController extends Controller
 {
     // Store a new order
@@ -24,7 +24,6 @@ class OrderController extends Controller
             'payment_method' => 'required|string|max:50',
         ]);
 
-        // If validation fails, return a response with error messages
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->errors(),
@@ -44,22 +43,17 @@ class OrderController extends Controller
             'payment_method' => $request->payment_method,
         ]);
 
-        // Return a success response with the created order data
+        // Clear the user's cart
+        // Clear the user's selected cart items
+Cart::where('user_id', 2) // Make sure we clear the cart for the specific user
+->where('selected', 1) // Ensure we are clearing only selected items
+->delete();
+
+
+        // Return a success response
         return response()->json([
-            'message' => 'Order successfully created',
+            'message' => 'Order successfully created and cart cleared.',
             'order' => $order,
         ], 201);
-    }
-
-    // Optional: Method for fetching an order by its ID
-    public function show($id)
-    {
-        $order = Order::find($id);
-
-        if (!$order) {
-            return response()->json(['message' => 'Order not found'], 404);
-        }
-
-        return response()->json(['order' => $order]);
     }
 }

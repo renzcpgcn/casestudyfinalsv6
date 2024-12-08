@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -20,6 +19,7 @@ return new class extends Migration
                 $table->text('product_description');
                 $table->decimal('price', 10, 2); // Price of the product
                 $table->integer('quantity')->default(1); // Default quantity
+                $table->integer('selected')->default(1); // Boolean to indicate if the item is selected for checkout
                 $table->timestamps();
             });
         }

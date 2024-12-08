@@ -29,12 +29,19 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        // Authenticate the user
         $request->authenticate();
 
+        // After successful login, manually set the user_id in the session
+        session(['user_id' => Auth::id()]);
+
+        // Regenerate the session to prevent session fixation attacks
         $request->session()->regenerate();
 
+        // Redirect to the intended route or dashboard
         return redirect()->intended(route('dashboard', absolute: false));
     }
+
 
     /**
      * Destroy an authenticated session.
