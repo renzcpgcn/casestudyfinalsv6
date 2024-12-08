@@ -19,7 +19,7 @@ const CartPage = () => {
             .then((response) => {
                 const itemsWithSelected = response.data.map((item) => ({
                     ...item,
-                    selected: true, // Make each checkbox checked by default
+                    selected: item.selected === 1, // Ensure that the `selected` field is properly interpreted as a boolean
                 }));
                 setCartItems(itemsWithSelected);
                 setSelectedItems(itemsWithSelected); // Initialize selectedItems with all items

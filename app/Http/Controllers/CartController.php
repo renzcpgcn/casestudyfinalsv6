@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
@@ -9,22 +10,24 @@ use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
-    // Get all cart items
+         // Get all cart items
     public function index()
     {
-        $carts = Cart::where('user_id', Auth::id())->get();  // Use Auth::id() to get the current user
+        $carts = Cart::all();
         return response()->json($carts);
     }
 
     // Get a specific cart item by ID
     public function show($id)
     {
-        $cart = Cart::where('user_id', Auth::id())->find($id);  // Ensure the cart item belongs to the authenticated user
+        $cart = Cart::find($id);
         if ($cart) {
             return response()->json($cart);
         }
         return response()->json(['message' => 'Cart item not found'], 404);
     }
+
+    // View cart contents
 
     // Add product to cart
     public function addToCart(Request $request)
@@ -34,7 +37,7 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $user = Auth::user();  // Get the authenticated user
+        $user = Auth::user();
         $product = Product::findOrFail($request->product_id);
 
         // Check if the item is already in the cart
@@ -61,43 +64,46 @@ class CartController extends Controller
     }
 
     // View cart contents
-    public function viewCart()
-    {
-        $user = Auth::user();  // Get the authenticated user
+   public function viewCart()
+{
+    $user = Auth::user();
 
-        // Get the products in the user's cart
-        $cartItems = Cart::with('product')->where('user_id', $user->id)->get();  // Use Auth::id() to get the current user
+    // Get the products in the user's cart
+    $cartItems = Cart::with('product')->where('user_id', 1)->get();
 
-        // Return the view with the cart items
-        return view('cart.index', [
-            'cartItems' => $cartItems,
-            'totalPrice' => $cartItems->sum(fn($item) => $item->quantity * $item->product->price),
-        ]);
+    // Return the view with the cart items
+    return view('cart.index', [
+        'cartItems' => $cartItems,
+        'totalPrice' => $cartItems->sum(fn($item) => $item->quantity * $item->product->price),
+    ]);
+}
+// In CartController.php
+
+
+public function updateCartQuantity(Request $request, $id)
+{
+    $request->validate([
+        'quantity' => 'required|integer|min:1',
+    ]);
+
+    $cartItem = Cart::find($id);
+
+    if ($cartItem) {
+        $cartItem->quantity = $request->quantity;
+        $cartItem->save();
+
+        return response()->json(['message' => 'Quantity updated successfully!']);
     }
 
-    // Update cart quantity
-    public function updateCartQuantity(Request $request, $id)
-    {
-        $request->validate([
-            'quantity' => 'required|integer|min:1',
-        ]);
+    return response()->json(['message' => 'Cart item not found'], 404);
+}
 
-        $cartItem = Cart::where('user_id', Auth::id())->find($id);  // Ensure the cart item belongs to the authenticated user
-
-        if ($cartItem) {
-            $cartItem->quantity = $request->quantity;
-            $cartItem->save();
-
-            return response()->json(['message' => 'Quantity updated successfully!']);
-        }
-
-        return response()->json(['message' => 'Cart item not found'], 404);
-    }
 
     // Remove product from cart
     public function destroy($id)
     {
-        $cartItem = Cart::where('user_id', Auth::id())->find($id);  // Ensure the cart item belongs to the authenticated user
+        // Assuming you have a Cart model
+        $cartItem = Cart::find($id);
 
         if ($cartItem) {
             $cartItem->delete();
@@ -113,7 +119,7 @@ class CartController extends Controller
             'selected' => 'required|boolean',
         ]);
 
-        $cartItem = Cart::where('user_id', Auth::id())->find($id);  // Ensure the cart item belongs to the authenticated user
+        $cartItem = Cart::find($id);
 
         if (!$cartItem) {
             return response()->json(['message' => 'Cart item not found'], 404);
@@ -124,13 +130,12 @@ class CartController extends Controller
 
         return response()->json(['message' => 'Selection updated successfully']);
     }
-
-    // Clear selected items from the cart
     public function clearSelectedItems(Request $request)
     {
-        $deletedCount = Cart::where('user_id', Auth::id())  // Use Auth::id() to get the current user's ID
-            ->where('selected', 1)
-            ->delete();
+        $userId = $request->input('user_id');
+
+        // Delete items where 'selected' is 1
+        $deletedCount = Cart::where('user_id', $userId)->where('selected', 1)->delete();
 
         if ($deletedCount > 0) {
             return response()->json(['message' => 'Selected items cleared from the cart.'], 200);
@@ -138,11 +143,12 @@ class CartController extends Controller
 
         return response()->json(['message' => 'No selected items found in the cart.'], 404);
     }
-
-    // Clear all cart items for the authenticated user
     public function clearSelected(Request $request)
     {
-        $deleted = Cart::where('user_id', Auth::id())->delete();  // Use Auth::id() to get the current user's ID
+        $userId = $request->input('user_id');
+
+        // Assuming you have a Cart model to manage cart items
+        $deleted = Cart::where('user_id', $userId)->delete();
 
         if ($deleted) {
             return response()->json(['message' => 'Selected items cleared successfully.']);
@@ -153,19 +159,27 @@ class CartController extends Controller
 
     public function selectAll()
     {
-        Cart::where('user_id', Auth::id())  // Use Auth::id() to update the user's cart items
-            ->update(['selected' => 1]);
+        // Update all records in the carts table to set 'selected' column to 1
+        Cart::query()->update(['selected' => 1]);
 
         return response()->json([
             'message' => 'All items selected successfully',
         ]);
     }
 
-    // Get the cart item count for the current user
     public function getCartItemCount(Request $request)
     {
-        $cartItemCount = Cart::where('user_id', Auth::id())->sum('quantity');  // Use Auth::id() to get the current user's ID
+        $userId = $request->query('user_id', 2); // Get user_id from query parameter
+
+        if (!$userId) {
+            return response()->json(['error' => 'user_id is required'], 400);
+        }
+
+        // Calculate the sum of quantities for the given user_id
+        $cartItemCount = Cart::where('user_id', $userId)->sum('quantity');
 
         return response()->json(['count' => $cartItemCount]);
     }
+
+
 }

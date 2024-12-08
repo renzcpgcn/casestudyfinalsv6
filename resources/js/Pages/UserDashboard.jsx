@@ -1,33 +1,39 @@
 import React, { useEffect, useState } from 'react';
-import { Inertia } from '@inertiajs/inertia'; // Import Inertia here
+import { Inertia } from '@inertiajs/inertia';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-import axiosInstance from '../axiosInstance'; // Adjusted relative path
+import axiosInstance from '../axiosInstance';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import ProductList from './ProductComponents/ProductList';
 import { Form } from 'react-bootstrap';
 import UserProductList from './UserComponents/UserProductList';
 import PrimaryButton from '@/Components/PrimaryButton';
 
 const UserDashboard = () => {
-    const [products, setProducts] = useState([]); // All products
-    const [filteredProducts, setFilteredProducts] = useState([]); // Filtered products based on search
+    const [products, setProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [query, setQuery] = useState(''); // Search query
-    const [cartItemCount, setCartItemCount] = useState(0); // State for cart item count
+    const [query, setQuery] = useState('');
+    const [cartItemCount, setCartItemCount] = useState(0);
 
     useEffect(() => {
         fetchProducts();
-        fetchCartItemCount(); // Fetch cart item count on component mount
+        fetchCartItemCount();
+
+        // Set an interval to fetch the cart count every 3 seconds
+        const interval = setInterval(() => {
+            fetchCartItemCount();
+        }, 3000);
+
+        // Clear the interval on component unmount
+        return () => clearInterval(interval);
     }, []);
 
     const fetchProducts = async () => {
         try {
-            // Fetch products for the user
             const response = await axiosInstance.get('/api/products');
             setProducts(response.data);
-            setFilteredProducts(response.data); // Display all products initially
+            setFilteredProducts(response.data);
             setLoading(false);
         } catch (error) {
             console.error("Error fetching products:", error);
@@ -38,16 +44,20 @@ const UserDashboard = () => {
 
     const fetchCartItemCount = async () => {
         try {
-            // Fetch the count of items in the user's cart
             const response = await axiosInstance.get('/api/cart/item-count');
-            setCartItemCount(response.data.count); // Set cart item count state
+            setCartItemCount(response.data.count);
         } catch (error) {
             console.error("Error fetching cart item count:", error);
         }
     };
 
-    const handleViewCart = async () => {
-        Inertia.visit('/cart'); // Navigate to the Cart Page
+    const handleAddToCart = async (productId) => {
+        try {
+            await axiosInstance.post('/api/cart/add', { product_id: productId });
+            await fetchCartItemCount(); // Optional: Immediately update after adding to cart
+        } catch (error) {
+            console.error("Error adding product to cart:", error);
+        }
     };
 
     const handleSearchInput = (e) => {
@@ -65,6 +75,10 @@ const UserDashboard = () => {
         setFilteredProducts(filtered);
     };
 
+    const handleViewCart = () => {
+        Inertia.visit('/cart');
+    };
+
     return (
         <AuthenticatedLayout
             header={
@@ -75,7 +89,7 @@ const UserDashboard = () => {
                         </h2>
                         <div className="ml-auto">
                             <PrimaryButton className="ms-4" onClick={handleViewCart}>
-                                View Cart ({cartItemCount}) {/* Display cart item count here */}
+                                View Cart ({cartItemCount})
                             </PrimaryButton>
                         </div>
                     </div>
@@ -100,7 +114,10 @@ const UserDashboard = () => {
                 ) : error ? (
                     <p>{error}</p>
                 ) : (
-                    <UserProductList products={filteredProducts} />
+                    <UserProductList
+                        products={filteredProducts}
+                        onAddToCart={handleAddToCart} // Pass the handler here
+                    />
                 )}
             </div>
         </AuthenticatedLayout>
